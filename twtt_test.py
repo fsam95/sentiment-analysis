@@ -37,18 +37,40 @@ class TypicalTestCase(unittest.TestCase):
 
   def testAdjustBoundariesInQuotes(self):
     simple_tweet = "'Damn!' The grind is inspirational and saddening at the same time.  Don't want you to stop cuz I like what u do! Much love"
-    expected_boundaries = [5, 63, 109]
-    actual_boundaries = twtt.adjust_boundaries_in_quotes(tweet, [4, 63, 109])
+    expected_boundaries = [6, 63, 109]
+    actual_boundaries = twtt.adjust_boundaries_in_quotes(simple_tweet, [5, 63, 109])
     self.assertEqual(actual_boundaries, expected_boundaries)
+
+  def testFindPrecedingWord(self):
+    simple_tweet = "Mr. Brooks"
+    expected_word = "Mr"
+    actual_word = twtt.find_preceding_word(simple_tweet, 2)
+    self.assertEqual(actual_word, expected_word)
 
   def testRemoveIncorrectPreemptiveBoundaries(self):
     simple_tweet = "Don't think thats the right name for Mr. Brooks."
-    preemptive_boundaries = [39. 47]
+    preemptive_boundaries = [39, 47]
     expected_boundaries = [47]
-    self.assertEqual
+    actual_boundaries = twtt.remove_abbreviation_boundaries(simple_tweet, preemptive_boundaries)
+    self.assertEqual(actual_boundaries, expected_boundaries)
 
+  # TODO: Fix this
+#  def testMultipleConsecPunctuation(self):
+#    simple_tweet = "Hello!!!"
+#    preemptive_boundaries = 
 
+  def testAddNewlines(self):
+    simple_tweet = "Damn! The grind is inspirational and saddening at the same time.  Don't want you to stop cuz I like what u do! Much love"
+    expected_tweet = "Damn!\n The grind is inspirational and saddening at the same time.\n  Don't want you to stop cuz I like what u do!\n Much love"
+    actual_tweet = twtt.put_newlines_on_boundaries(simple_tweet, [4,63,109])
+    self.assertEqual(actual_tweet, expected_tweet)
 
+  def testSpaceTokens(self):
+    simple_tweet = "Damn! The grind is inspirational and saddening at the same time.  Don't want you to stop cuz I like what u do! Much love"
+    expected_tweet = "Damn ! The grind is inspirational and saddening at the same time .  Don 't want you to stop cuz I like what u do ! Much love"
+    self.assertEqual(twtt.space_tokens(simple_tweet), expected_tweet)
+    
+    
 if __name__ == '__main__':
   unittest.main(exit=False)
 

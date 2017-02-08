@@ -28,7 +28,17 @@ Cases:  '.' Used for an abbreviation and the next word starts with a capital: us
 # TODO: Break this into separate cases
      
 def remove_abbreviation_boundaries(tweet, boundaries): 
-  # TODO: Figure out how to decalre aabbrevs as global variables
+  # Load abbreviations
+  abbrevs_followed_by_cap = [] # e.g Mr. Sir
+  abbrevs_followed_by_lower = [] # e.g e.g. 
+  with open('abbrev.english', 'rb') as abbrevs:
+
+    for line in abbrevs:
+      if line[0].isupper():
+        abbrevs_followed_by_cap.append(line.strip(".\n"))
+      else: 
+        abbrevs_followed_by_lower.append(line.strip(".\n"))
+
   new_boundaries = []
   for boundary_index in boundaries:
     preceding_word = find_preceding_word(tweet, boundary_index)
@@ -41,6 +51,24 @@ def remove_abbreviation_boundaries(tweet, boundaries):
     new_boundaries.append(boundary_index)
   return new_boundaries
 
+# TODO: Fix this
+#def adjust_multiple_punctuation(tweet, boundaries):
+#  new_boundaries = []
+#  for i in range(0, len(new_sentence_boundaries)):
+#    if tweet[boundaries[i] + 1] == '!': # !!
+#      incrementor = 1
+#      while tweet[boundaries[i] + incrementor] == '!':
+#        incrementor = incrementor + 1
+#      boundaries[i] += incrementor
+#    elif tweet[boundaries[i] + 1] == '.': # ....
+#      incrementor = 1
+#      while tweet[boundaries[i] + incrementor] == '.':
+#        incrementor = incrementor + 1
+#
+#       boundaries[i] += incrementor  
+#  else: 
+#  new_boundaries.append(boundaries[i]) 
+
 def add_sentence_boundary(tweet):
 
   sentence_boundaries = naive_sentence_boundaries(tweet)
@@ -48,42 +76,43 @@ def add_sentence_boundary(tweet):
   sentence_boundaries = adjust_boundaries_in_quotes(tweet, sentence_boundaries)
 
   # Watching out for Titles (e.g Dr. and stuff)
-  new_sentence_boundaries = []
-  for boundary_index in sentence_boundaries:     
-    # find the preceding word
-    preceding_word = find_preceding_word(tweet, boundary)
-    if preceding_word in abbrevs_followed_by_cap:
-      # Need to check if the next word is capitalized
-      if tweet[boundary_index + 2].isupper():
-        continue #don't add it to new_sentence_boundaries # don't add it to new_sentence_boundaries because it follows form Mr. Sir
-    elif preceding_word in abbrevs_followed_by_lower:
-      if tweet[boundary_index + 2].islower():
-        continue #don't add it to new_sentence_boundaries because it follows form: i.e. something something
-    new_sentence_boundaries.append(boundary_index)  
+  new_sentence_boundaries = remove_abbreviation_boundaries(sentence_boundaries)
 
   # Check if ellipses or multiple exclamations
-  for i in range(0, len(new_sentence_boundaries)):
-    if tweet[new_sentence_boundaries[i] + 1] == '!': # !!
-      incrementor = 1
-      while tweet[new_sentence_boundaries[i] + incrementor] == '!':
-        incrementor = incrementor + 1
-      new_sentence_boundaries[i] = incrementor - 1
-    elif tweet[new_sentence_boundaries[i] + 1] == '.': # ....
-      incrementor = 1
-      while tweet[new_sentence_boundaries[i] + incrementor] == '.':
-        incrementor = incrementor + 1
-      new_sentence_boundaries[i] = incrementor - 1
    
+
+def put_newlines_on_boundaries(tweet, boundaries):
   # Construct tweet where every sentence is on newline
   newlined_string = ""
   i = 0
   while i != len(tweet):
-    if new_sentence_boundaries != [] or i == new_sentence_boundaries[0]:
-      newlined_string += ".\n"
+    if boundaries != [] and i == boundaries[0]:
+      newlined_string += tweet[i]
+      newlined_string += "\n"
       i += 1
-      new_sentence_boundaries = new_sentence_boundaries[1:]
+      boundaries = boundaries[1:]
     else: 
-      newlined_string = tweet[count]
+      newlined_string += tweet[i]
+      i += 1
+  return newlined_string
+
+def space_tokens(tweet):
+  spaced_tweet = ""
+  # for char in tweet:
+  #  if char == "." or char == "!":
+  for i in range(len(tweet) - 1):
+    spaced_tweet += tweet[i]
+    if tweet[i + 1] == "." or tweet[i + 1] == "!":
+      spaced_tweet += " "
+    
+    if i > len(tweet) - 2 and tweet[i+2] == "'" and tweet[i+1] == "n": #don't becomes do n't 
+      spaced_tweet += " "
+    if tweet[i+1] == "'": # dogs' becomes dogs '
+      spaced_tweet += " "
+  if tweet[len(tweet) - 1] == "."or tweet[len(tweet) - 1] == "!":
+    spaced_tweet += " "
+  spaced_tweet += tweet[len(tweet) - 1]
+  return spaced_tweet
 
 def find_preceding_word(tweet, boundary):
   preceding_word = ""
@@ -135,12 +164,3 @@ if __name__ == '__main__':
       tweet = row[5]
 
   # TODO: fix this up 
-  abbrevs_followed_by_cap = [] # e.g Mr. Sir
-  abbrevs_followed_by_lower = [] # e.g e.g. 
-  with open('abbrev.english', 'rb') as abbrevs:
-
-    for line in abbrevs:
-      if line[0].isupper():
-        abbrevs_followed_by_cap.append(line.strip("."))
-      else: 
-        abbrevs_followed_by_lower.append(line.strip("."))
