@@ -26,7 +26,23 @@ Cases:  '.' Used for an abbreviation and the next word starts with a capital: us
         Ending with ? or !
 """
 # TODO: Break this into separate cases
+     
+def remove_abbreviation_boundaries(tweet, boundaries): 
+  # TODO: Figure out how to decalre aabbrevs as global variables
+  new_boundaries = []
+  for boundary_index in boundaries:
+    preceding_word = find_preceding_word(tweet, boundary_index)
+    if preceding_word in abbrevs_followed_by_cap:
+      if tweet[boundary_index + 2].isupper():
+        continue
+    elif preceding_word in abbrevs_followed_by_lower:
+      if tweet[boundary_index + 2].islower():
+        continue
+    new_boundaries.append(boundary_index)
+  return new_boundaries
+
 def add_sentence_boundary(tweet):
+
   sentence_boundaries = naive_sentence_boundaries(tweet)
 
   sentence_boundaries = adjust_boundaries_in_quotes(tweet, sentence_boundaries)
@@ -35,11 +51,7 @@ def add_sentence_boundary(tweet):
   new_sentence_boundaries = []
   for boundary_index in sentence_boundaries:     
     # find the preceding word
-    preceding_word = ""
-    char_index = boundary_index - 1
-    while tweet[char_index] != "":
-      preceding_word = tweet[char_index] + preceding_word 
-      char_index -= 1
+    preceding_word = find_preceding_word(tweet, boundary)
     if preceding_word in abbrevs_followed_by_cap:
       # Need to check if the next word is capitalized
       if tweet[boundary_index + 2].isupper():
@@ -72,6 +84,14 @@ def add_sentence_boundary(tweet):
       new_sentence_boundaries = new_sentence_boundaries[1:]
     else: 
       newlined_string = tweet[count]
+
+def find_preceding_word(tweet, boundary):
+  preceding_word = ""
+  i = boundary - 1
+  while i != -1 and tweet[i] != " ":
+    preceding_word = tweet[i] + preceding_word
+    i -= 1
+  return preceding_word
 
 def naive_sentence_boundaries(tweet):
   sentence_boundaries = []
@@ -124,4 +144,3 @@ if __name__ == '__main__':
         abbrevs_followed_by_cap.append(line.strip("."))
       else: 
         abbrevs_followed_by_lower.append(line.strip("."))
-
