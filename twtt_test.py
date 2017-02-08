@@ -67,9 +67,20 @@ class TypicalTestCase(unittest.TestCase):
 
   def testSpaceTokens(self):
     simple_tweet = "Damn! The grind is inspirational and saddening at the same time.  Don't want you to stop cuz I like what u do! Much love"
-    expected_tweet = "Damn ! The grind is inspirational and saddening at the same time .  Don 't want you to stop cuz I like what u do ! Much love"
+    expected_tweet = "Damn ! The grind is inspirational and saddening at the same time .  Do n't want you to stop cuz I like what u do ! Much love"
+    actual_tweet = twtt.space_tokens(simple_tweet)
+
     self.assertEqual(twtt.space_tokens(simple_tweet), expected_tweet)
+
+  def testTagTokens(self):
+    simple_tweet = "dog dog dog"
+    expected_tweet = "dog/NN dog/NN dog/NN"
+    actual_tweet = twtt.tag_tokens(simple_tweet)
+    self.assertEqual(actual_tweet, expected_tweet)
     
+  def testComplete(self):
+    simple_tweet = "Damn! The grind is inspirational and saddening at the same time.  Don't want you to stop cuz I like what u do! Much love"
+    twtt.add_sentence_boundary(simple_tweet)
     
 if __name__ == '__main__':
   unittest.main(exit=False)

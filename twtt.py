@@ -1,4 +1,5 @@
 import HTMLParser
+import NLPlib
 import csv
 import re
 
@@ -76,9 +77,14 @@ def add_sentence_boundary(tweet):
   sentence_boundaries = adjust_boundaries_in_quotes(tweet, sentence_boundaries)
 
   # Watching out for Titles (e.g Dr. and stuff)
-  new_sentence_boundaries = remove_abbreviation_boundaries(sentence_boundaries)
+  new_sentence_boundaries = remove_abbreviation_boundaries(tweet, sentence_boundaries)
 
   # Check if ellipses or multiple exclamations
+  newlined_tweet = put_newlines_on_boundaries(tweet, new_sentence_boundaries)
+  spaced_tweet = space_tokens(newlined_tweet)
+  tagged_tweet = tag_tokens(spaced_tweet)
+  print tagged_tweet
+  
    
 
 def put_newlines_on_boundaries(tweet, boundaries):
@@ -105,14 +111,34 @@ def space_tokens(tweet):
     if tweet[i + 1] == "." or tweet[i + 1] == "!":
       spaced_tweet += " "
     
-    if i > len(tweet) - 2 and tweet[i+2] == "'" and tweet[i+1] == "n": #don't becomes do n't 
+    if i < len(tweet) - 2 and tweet[i+2] == "'" and tweet[i+1] == "n": #don't becomes do n't 
       spaced_tweet += " "
-    if tweet[i+1] == "'": # dogs' becomes dogs '
+    if tweet[i+1] == "'" and tweet[i] != "n": # dogs' becomes dogs '
       spaced_tweet += " "
   if tweet[len(tweet) - 1] == "."or tweet[len(tweet) - 1] == "!":
     spaced_tweet += " "
   spaced_tweet += tweet[len(tweet) - 1]
   return spaced_tweet
+
+
+def tag_tokens(spaced_tweet):
+  tagger = NLPlib.NLPlib()
+
+  removed_newlines = spaced_tweet.replace("\n", "")
+  tags = tagger.tag(removed_newlines.split(" "))
+
+  tagged_spaced_tweet = ""
+  for i in range(len(spaced_tweet)):
+    if spaced_tweet[i] == " ":
+      tagged_spaced_tweet += "/"
+      tagged_spaced_tweet += tags[0]
+      tags = tags[1:]
+    tagged_spaced_tweet += spaced_tweet[i]
+    if i == len(spaced_tweet) - 1:
+      tagged_spaced_tweet += "/"
+      tagged_spaced_tweet += tags[0]
+  print tagged_spaced_tweet.split(" ")
+  return tagged_spaced_tweet
 
 def find_preceding_word(tweet, boundary):
   preceding_word = ""
@@ -163,4 +189,3 @@ if __name__ == '__main__':
     for row in training_set_reader:
       tweet = row[5]
 
-  # TODO: fix this up 
