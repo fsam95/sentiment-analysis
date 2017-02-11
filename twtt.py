@@ -85,7 +85,6 @@ def adjust_multiple_punctuation(tweet, boundaries):
 
 def put_newlines_on_boundaries(tweet, boundaries):
   # Construct tweet where every sentence is on newline
-  print tweet
   newlined_string = ""
   i = 0
   while i < len(tweet):
@@ -107,7 +106,7 @@ def space_tokens(tweet):
   spaced_colons_tweet = re.sub(r":", " :", spaced_exclaims_tweet)
   spaced_semicolons_tweet = re.sub(r";", " ;", spaced_colons_tweet)
   spaced_commas_tweet = re.sub(r",", " ,", spaced_semicolons_tweet)
-  return re.sub(r"(?P<clitic>(n't|'))", " \g<clitic>", spaced_commas_tweet)
+  return re.sub(r"(?P<clitic>(n't|'))", " \g<clitic>", re.sub(r"( )+", " ", spaced_commas_tweet))
 
   #######
   #
@@ -130,8 +129,8 @@ def space_tokens(tweet):
 
 
 def tag_tokens(spaced_tweet):
-
-  tagger = NLPlib.NLPlib()
+  print spaced_tweet
+  #tagger = NLPlib.NLPlib()
   removed_newlines = spaced_tweet.replace("\n", "")
   tags = tagger.tag(removed_newlines.split(" "))
 
@@ -141,7 +140,7 @@ def tag_tokens(spaced_tweet):
       tagged_spaced_tweet += "/"
       tagged_spaced_tweet += tags[0]
       tags = tags[1:]
-    if spaced_tweet[i] == " " and spaced_tweet[i-1] != " " and tags != []:
+    if spaced_tweet[i] == " " and spaced_tweet[i-1] != "\n" and tags != []:
       tagged_spaced_tweet += "/"
       tagged_spaced_tweet += tags[0]
       tags = tags[1:]
@@ -209,6 +208,6 @@ if __name__ == '__main__':
       tweet = row[5]
       preprocessed_tweet = "<A={}>\n".format(polarity) + process(tweet) + "\n"
       outfile.write(preprocessed_tweet)
-      if count > 200:
+      if count > 1:
         break
 

@@ -22,13 +22,6 @@ class TypicalTestCase(unittest.TestCase):
     expected = "markhardy1974 Me too  itm"
     self.assertEqual(twtt.twtt4(tweet_with_at_hash), expected)
 
-  def testNewlineOnBoundaries(self):
-    simple_tweet = "Damn! The grind is inspirational and saddening at the same time.  Don't want you to stop cuz I like what u do! Much love"
-    expected_tweet = "Damn!\n The grind is inspirational and saddening at the same time.\n  Don't want you to stop cuz I like what u do!\n Much love"
-    boundaries = [4, 63, 109]
-    actual_tweet = twtt.place_newline_on_boundaries(simple_tweet, boundaries)
-    self.assertEqual(actual_tweet, expected_tweet)
-
   def testNaiveSentenceBoundaries(self):
     simple_tweet = "Damn! The grind is inspirational and saddening at the same time.  Don't want you to stop cuz I like what u do! Much love"
     expected_boundaries = [4, 63, 109]
