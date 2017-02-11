@@ -8,19 +8,19 @@ class TypicalTestCase(unittest.TestCase):
 
   def testStripCharCodes(self):
     expected_tweet = 'watching "House"'
-    actual = twtt.strip_char_codes(self.tweet_with_char_codes)
+    actual = twtt.twtt2(self.tweet_with_char_codes)
     self.assertEqual(actual, expected_tweet) 
 
   def testRemoveUrls(self):
     tweet_with_urls = "Broadband plan 'a massive broken promise' http://tinyurl.com/dcuc33 via www.diigo.com/~tautao Still waiting for broadband we are " 
     expected = "Broadband plan 'a massive broken promise'  via  Still waiting for broadband we are " 
-    actual = twtt.remove_urls(tweet_with_urls)
+    actual = twtt.twtt3(tweet_with_urls)
     self.assertEqual(actual, expected)
 
   def testRemoveHashAndAt(self):
     tweet_with_at_hash = "@markhardy1974 Me too  #itm"
     expected = "markhardy1974 Me too  itm"
-    self.assertEqual(twtt.remove_hash_and_at(tweet_with_at_hash), expected)
+    self.assertEqual(twtt.twtt4(tweet_with_at_hash), expected)
 
   def testNewlineOnBoundaries(self):
     simple_tweet = "Damn! The grind is inspirational and saddening at the same time.  Don't want you to stop cuz I like what u do! Much love"
@@ -54,22 +54,24 @@ class TypicalTestCase(unittest.TestCase):
     actual_boundaries = twtt.remove_abbreviation_boundaries(simple_tweet, preemptive_boundaries)
     self.assertEqual(actual_boundaries, expected_boundaries)
 
-  # TODO: Fix this
-#  def testMultipleConsecPunctuation(self):
-#    simple_tweet = "Hello!!!"
-#    preemptive_boundaries = 
+  def testRemoveBoundariesForMultiplePunctuation(self):
+    simple_tweet = "Hello!!!!"
+    preemptive_boundaries = [5,6,7,8]
+    expected_boundaries = [8]
+    actual_boundaries = twtt.adjust_multiple_punctuation(simple_tweet, preemptive_boundaries)
+    self.assertEqual(actual_boundaries, expected_boundaries)
 
   def testAddNewlines(self):
-    simple_tweet = "Damn! The grind is inspirational and saddening at the same time.  Don't want you to stop cuz I like what u do! Much love"
-    expected_tweet = "Damn!\n The grind is inspirational and saddening at the same time.\n  Don't want you to stop cuz I like what u do!\n Much love"
-    actual_tweet = twtt.put_newlines_on_boundaries(simple_tweet, [4,63,109])
+    simple_tweet = "Damn! The grind is inspirational and saddening at the same time. Don't want you to stop cuz I like what u do! Much love"
+    expected_tweet = "Damn!\nThe grind is inspirational and saddening at the same time.\nDon't want you to stop cuz I like what u do!\nMuch love"
+    actual_tweet = twtt.put_newlines_on_boundaries(simple_tweet, [4,63,108])
     self.assertEqual(actual_tweet, expected_tweet)
 
-  def testSpaceTokens(self):
-    simple_tweet = "Damn! The grind is inspirational and saddening at the same time.  Don't want you to stop cuz I like what u do! Much love"
-    expected_tweet = "Damn ! The grind is inspirational and saddening at the same time .  Do n't want you to stop cuz I like what u do ! Much love"
+  
+  def testSpaceTokensAfterNewlinesAdded(self):
+    simple_tweet = "Damn!\nThe grind is inspirational and saddening at the same time.\nDon't want you to stop cuz I like what u do!\nMuch love"
+    expected_tweet = "Damn !\n The grind is inspirational and saddening at the same time .\n Do n't want you to stop cuz I like what u do !\n Much love"
     actual_tweet = twtt.space_tokens(simple_tweet)
-
     self.assertEqual(twtt.space_tokens(simple_tweet), expected_tweet)
 
   def testTagTokens(self):
@@ -77,10 +79,7 @@ class TypicalTestCase(unittest.TestCase):
     expected_tweet = "dog/NN dog/NN dog/NN"
     actual_tweet = twtt.tag_tokens(simple_tweet)
     self.assertEqual(actual_tweet, expected_tweet)
-    
-  def testComplete(self):
-    simple_tweet = "Damn! The grind is inspirational and saddening at the same time.  Don't want you to stop cuz I like what u do! Much love"
-    twtt.add_sentence_boundary(simple_tweet)
+
     
 if __name__ == '__main__':
   unittest.main(exit=False)
